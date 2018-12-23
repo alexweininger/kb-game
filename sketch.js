@@ -1,32 +1,27 @@
-var y = 100;
-var p = new Player(new Vector(100, 100), 10);
-
+p5.disableFriendlyErrors = true;
 var keyState = {};
-
+var p = new Player(new Vector(100, 100), 5);
 var shootKeys = [];
-
+var walking = false;
 var projectiles = [];
-
-const CANVAS_HEIGHT = 800;
-const CANVAS_WIDTH = 1440;
-
+var walkToggle = false;
+var CANVAS_HEIGHT = 800;
+var CANVAS_WIDTH = 1440;
+var ps;
+var item;
 function setup() {
 	// createCanvas must be the first statement
-	createCanvas(CANVAS_HEIGHT, CANVAS_WIDTH);
+	createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 	stroke(0); // Set line drawing color to white
-	frameRate(30);
+	frameRate(60);
+	ps = createSprite(p.pos.x, p.pos.y, 30, 30);
 }
 // The statements in draw() are executed until the
 // program is stopped. Each statement is executed in
 // sequence and after the last line is read, the first
 // line is executed again.
 function draw() {
-	background(255); // Set the background to black
-	y = y - 1;
-	if (y < 0) {
-		y = height;
-	}
-	ellipse(p.pos.x, p.pos.y, 50, 50);
+	background(255); // Set the background to white
 
 	window.addEventListener('keydown', function (e) {
 		keyState[e.keyCode || e.which] = true;
@@ -34,14 +29,41 @@ function draw() {
 	window.addEventListener('keyup', function (e) {
 		keyState[e.keyCode || e.which] = false;
 	}, true);
-	gameLoop();
+
+	item = p.getItemInHand().getSprite(p.pos.x, p.pos.y, p.facing);
+
 	drawProjectiles();
+	drawGui(p);
+	gameLoop();
+	drawSprites();
+	item.remove();
+}
+
+function drawGui(p) {
+	textSize(32);
+	var i = 0;
+	p.items.forEach(item => {
+		fill(0);
+		stroke(0);
+		if (p.currentItemIndex == i) {
+			stroke(83, 66, 244);
+			fill(83, 66, 244);
+		}
+		text(item.name, 10 + i * 200, height - 50);
+		i++;
+	});
+	var fps = frameRate();
+	fill(0);
+	stroke(0);
+	// text("FPS: " + fps.toFixed(2), 10, height - 10);
 }
 
 function drawProjectiles() {
+	fill(0);
 	projectiles.forEach(proj => {
-		ellipse(proj.pos.x, proj.pos.y, 10, 10);
+		proj.draw();
 	});
+	fill(255);
 }
 
 function updateProjectiles() {
@@ -54,75 +76,91 @@ function updateProjectiles() {
 }
 
 function gameLoop() {
+	ps.position.x = p.pos.x;
+	ps.position.y = p.pos.y;
 	updateProjectiles();
 	if (keyState[KEY_W]) {
-		console.info("keypress W");
-		p.pos.y -= 10;
+		p.pos.y -= p.speed;
+		p.facing = 0;
 	}
 	if (keyState[KEY_A]) {
-		console.info("keypress A");
-		p.pos.x -= 10;
+		p.pos.x -= p.speed;
+		p.facing = 3;
 	}
 	if (keyState[KEY_S]) {
-		console.info("keypress S");
-		p.pos.y += 10;
+		p.pos.y += p.speed;
+		p.facing = 2;
 	}
 	if (keyState[KEY_D]) {
-		console.info("keypress D");
-		p.pos.x += 10;
+		p.pos.x += p.speed;
+		p.facing = 1;
+	}
+	if (keyState[KEY_W] || keyState[KEY_A] || keyState[KEY_S] || keyState[KEY_D]) {
+		walking = true;
 	}
 
 	if (keyState[KEY_I]) {
-		console.info("keypress I");
-		// projectiles.push(new Projectile(new Vector(p.pos.x, p.pos.y - 30), new Vector(0, -30), "bullet"));
 		keyPress(KEY_I);
 	}
 	if (keyState[KEY_J]) {
-		console.info("keypress J");
-		// projectiles.push(new Projectile(new Vector(p.pos.x - 30, p.pos.y), new Vector(-30, 0), "bullet"));
 		keyPress(KEY_J);
 	}
 	if (keyState[KEY_K]) {
-		console.info("keypress K");
-		// projectiles.push(new Projectile(new Vector(p.pos.x, p.pos.y + 30), new Vector(0, 30), "bullet"));
 		keyPress(KEY_K);
 	}
 	if (keyState[KEY_L]) {
-		console.info("keypress L");
-		// projectiles.push(new Projectile(new Vector(p.pos.x + 30, p.pos.y), new Vector(30, 0), "bullet"));
 		keyPress(KEY_L);
 	}
 	if (keyState[KEY_I] || keyState[KEY_J] || keyState[KEY_K] || keyState[KEY_L]) {
 		fire(shootKeys);
 	}
+
+	if (keyState[KEY_Q]) {
+		p.prevItem();
+		keyState[KEY_Q] = false;
+	}
+
+	if (keyState[KEY_E]) {
+		p.nextItem();
+		keyState[KEY_E] = false;
+	}
 }
 
 function fire(keys) {
-	var v = new Vector(0, 0);
 
-	keys.forEach(key => {
-		v.add(fireDirection(key));
-	});
-	if (!(v.x == 0 && v.y == 0)) {
-		projectiles.push(new Projectile(new Vector(p.pos.x + 30, p.pos.y), v, "bullet"));
+	if (p.getItemInHand() instanceof ProjectileWeapon) {
+		var d = new Date();
+		if (p.getItemInHand().lastUse - d < -p.getItemInHand().rateOfFire) {
+			var v = new Vector(0, 0);
 
+			keys.forEach(key => {
+				v.add(fireDirection(key));
+			});
+			if (!(v.x == 0 && v.y == 0)) {
+				p.getItemInHand().lastUse = new Date();
+
+				var projectile = createSprite(p.pos.x + 30, p.pos.y, 10, 10);
+				projectile.shapeColor = 0;
+				projectile.velocity.x = v.x;
+				projectile.velocity.y = v.y;
+			}
+		}
 	}
 	shootKeys = [];
-
 }
 
 function fireDirection(key) {
 	if (key === KEY_I) {
-		return new Vector(0, -30);
+		return new Vector(0, -p.getItemInHand().speed);
 	}
 	if (key === KEY_J) {
-		return new Vector(-30, 0);
+		return new Vector(-p.getItemInHand().speed, 0);
 	}
 	if (key === KEY_K) {
-		return new Vector(0, 30);
+		return new Vector(0, p.getItemInHand().speed);
 	}
 	if (key === KEY_L) {
-		return new Vector(30, 0);
+		return new Vector(p.getItemInHand().speed, 0);
 	}
 }
 
@@ -133,8 +171,6 @@ function keyPress(key) {
 		}
 		shootKeys.push(key);
 	}
-
-	console.log(shootKeys);
 }
 
 function isOnScreen(object) {
@@ -157,5 +193,8 @@ var KEY_I = 73;
 var KEY_J = 74;
 var KEY_K = 75;
 var KEY_L = 76;
+
+var KEY_Q = 81;
+var KEY_E = 69;
 
 var KEY_SPACE = 32;
