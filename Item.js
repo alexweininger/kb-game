@@ -1,7 +1,9 @@
 class Item {
 	constructor(name) {
 		this.name = name;
+		this.owned = true;
 	}
+
 }
 
 Object.defineProperty(Item.prototype, 'constructor', {
@@ -10,7 +12,15 @@ Object.defineProperty(Item.prototype, 'constructor', {
 	writable: true
 });
 
-Item.prototype.getSprite = function() {
+Item.prototype.drop = function () {
+	this.owned = false;
+};
+
+Item.prototype.isOwned = function () {
+	return this.owned;
+};
+
+Item.prototype.getSprite = function () {
 	return createSprite(this.pos.x, this.pos.y, 10, 10);
 }
 

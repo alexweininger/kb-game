@@ -16,7 +16,14 @@ class Player {
 }
 
 Player.prototype.size = new Vector(0.8, 1.5);
-
+Player.prototype.dropItem = function() {
+	this.getItemInHand().drop();
+	this.prevItem();
+	this.items = this.items.filter(function(item) {
+		return item.owned;
+	});
+	console.log(this.items);
+}
 Player.prototype.addItem = function (item) {
 	if (item instanceof Item) {
 		this.items.push(item);

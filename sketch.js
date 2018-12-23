@@ -9,6 +9,8 @@ var CANVAS_HEIGHT = 800;
 var CANVAS_WIDTH = 1440;
 var ps;
 var item;
+var items = [];
+
 function setup() {
 	// createCanvas must be the first statement
 	createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -30,13 +32,14 @@ function draw() {
 		keyState[e.keyCode || e.which] = false;
 	}, true);
 
-	item = p.getItemInHand().getSprite(p.pos.x, p.pos.y, p.facing);
+	if (p.getItemInHand())
+		item = p.getItemInHand().getSprite(p.pos.x, p.pos.y, p.facing);
 
-	drawProjectiles();
 	drawGui(p);
 	gameLoop();
 	drawSprites();
 	item.remove();
+	updateProjectiles();
 }
 
 function drawGui(p) {
@@ -55,15 +58,8 @@ function drawGui(p) {
 	var fps = frameRate();
 	fill(0);
 	stroke(0);
-	// text("FPS: " + fps.toFixed(2), 10, height - 10);
-}
-
-function drawProjectiles() {
-	fill(0);
-	projectiles.forEach(proj => {
-		proj.draw();
-	});
-	fill(255);
+	textSize(18);
+	text(fps.toFixed(0), 10, height - 10);
 }
 
 function updateProjectiles() {
@@ -78,7 +74,7 @@ function updateProjectiles() {
 function gameLoop() {
 	ps.position.x = p.pos.x;
 	ps.position.y = p.pos.y;
-	updateProjectiles();
+
 	if (keyState[KEY_W]) {
 		p.pos.y -= p.speed;
 		p.facing = 0;
@@ -114,15 +110,17 @@ function gameLoop() {
 	if (keyState[KEY_I] || keyState[KEY_J] || keyState[KEY_K] || keyState[KEY_L]) {
 		fire(shootKeys);
 	}
-
 	if (keyState[KEY_Q]) {
 		p.prevItem();
 		keyState[KEY_Q] = false;
 	}
-
 	if (keyState[KEY_E]) {
 		p.nextItem();
 		keyState[KEY_E] = false;
+	}
+	if (keyState[KEY_C]) {
+		p.dropItem();
+		keyState[KEY_C] = false;
 	}
 }
 
@@ -196,5 +194,7 @@ var KEY_L = 76;
 
 var KEY_Q = 81;
 var KEY_E = 69;
+
+var KEY_C = 67;
 
 var KEY_SPACE = 32;
