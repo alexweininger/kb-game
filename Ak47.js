@@ -7,10 +7,6 @@ class Ak47 extends ProjectileWeapon {
 	}
 }
 
-Ak47.prototype.getProjectile = function (pos, speed, type) {
-	return new Ak47Bullets(pos, speed, type);
-}
-
 Ak47.prototype.getSprite = function (x, y, facing) {
 	var s;
 	if (facing == 0) {

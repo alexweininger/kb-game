@@ -9,6 +9,8 @@ var CANVAS_HEIGHT = 800;
 var CANVAS_WIDTH = 1440;
 var ps;
 var item;
+var itemsSprites = [];
+var itemSprite;
 var items = [];
 
 function setup() {
@@ -32,14 +34,43 @@ function draw() {
 		keyState[e.keyCode || e.which] = false;
 	}, true);
 
-	if (p.getItemInHand())
-		item = p.getItemInHand().getSprite(p.pos.x, p.pos.y, p.facing);
-
+	drawItems();
 	drawGui(p);
 	gameLoop();
 	drawSprites();
 	item.remove();
 	updateProjectiles();
+	detectItemPickup();
+}
+
+function detectItemPickup() {
+	for (let i = 0; i < items.length; i++) {
+		const it = items[i];
+		const sp = itemsSprites[i];
+		if (sp.overlap(ps)) {
+			if (p.items.length == 0) {
+				p.currentItemIndex = 0;
+			}
+			console.log("collide");
+			it.pickup();
+			p.items.push(it);
+			sp.remove();
+		}
+
+	}
+	itemsSprites.forEach(item => {
+
+	});
+}
+
+function drawItems() {
+	if (p.items.length > 0) {
+		if (p.getItemInHand())
+			item = p.getItemInHand().getSprite(p.pos.x, p.pos.y, p.facing);
+	}
+	itemsSprites.forEach(item => {
+
+	});
 }
 
 function drawGui(p) {
@@ -119,7 +150,17 @@ function gameLoop() {
 		keyState[KEY_E] = false;
 	}
 	if (keyState[KEY_C]) {
-		p.dropItem();
+		if (p.items.length != 0) {
+			var h = p.getItemInHand();
+			if (h) {
+				if (p.items.length == 1) {
+					p.currentItemIndex = 0;
+				}
+				p.dropItem(p.pos);
+				items.push(h);
+				itemsSprites.push(h.getSprite(h.pos.x, h.pos.y, h.direction));
+			}
+		}
 		keyState[KEY_C] = false;
 	}
 }

@@ -17,12 +17,16 @@ class Player {
 
 Player.prototype.size = new Vector(0.8, 1.5);
 Player.prototype.dropItem = function() {
-	this.getItemInHand().drop();
-	this.prevItem();
+	this.getItemInHand().drop(this.pos, this.facing);
 	this.items = this.items.filter(function(item) {
 		return item.owned;
 	});
-	console.log(this.items);
+	if (this.items.length == 0) {
+		currentItemIndex = -1;
+	}
+	if (this.currentItemIndex == this.items.length) {
+		this.prevItem();
+	}
 }
 Player.prototype.addItem = function (item) {
 	if (item instanceof Item) {

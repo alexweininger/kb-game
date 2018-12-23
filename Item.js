@@ -12,8 +12,11 @@ Object.defineProperty(Item.prototype, 'constructor', {
 	writable: true
 });
 
-Item.prototype.drop = function () {
+Item.prototype.drop = function (pos, facing) {
 	this.owned = false;
+	this.pos = new Vector(pos.x, pos.y);
+	this.direction = facing;
+	this.dropTime = new Date();
 };
 
 Item.prototype.isOwned = function () {
@@ -22,6 +25,15 @@ Item.prototype.isOwned = function () {
 
 Item.prototype.getSprite = function () {
 	return createSprite(this.pos.x, this.pos.y, 10, 10);
+}
+
+Item.prototype.pickup = function () {
+	var d = new Date();
+	if (this.dropTime - d < -1000) {
+		this.owned = true;
+		return true;
+	}
+	return false;
 }
 
 Item.prototype.constructor = Item;

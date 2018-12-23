@@ -10,16 +10,16 @@ class Magnum extends ProjectileWeapon {
 Magnum.prototype.getSprite = function(x, y, facing) {
 	var s;
 	if (facing == 0) {
-		s = createSprite(x, y - 20, 10, 10);
+		s = createSprite(x, y - 30, 10, 10);
 	}
 	if (facing == 1) {
-		s = createSprite(x + 20, y, 10, 10);
+		s = createSprite(x + 30, y, 10, 10);
 	}
 	if (facing == 2) {
-		s = createSprite(x, y + 20, 10, 10);
+		s = createSprite(x, y + 30, 10, 10);
 	}
 	if (facing == 3) {
-		s = createSprite(x - 20, y, 10, 10);
+		s = createSprite(x - 30, y, 10, 10);
 	}
 	s.shapeColor = 'LightGrey';
 	return s;
