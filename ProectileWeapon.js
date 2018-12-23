@@ -1,5 +1,5 @@
 class ProjectileWeapon extends Item {
-	constructor(rof, speed, name, ammo, draw) {
+	constructor(rof, speed, name, ammo) {
 		super(name);
 		this.rateOfFire = rof;
 		this.speed = speed;
@@ -8,6 +8,14 @@ class ProjectileWeapon extends Item {
 	}
 }
 
+ProjectileWeapon.prototype.getAmmo = function() {
+	return this.ammo;
+}
+
 ProjectileWeapon.prototype.getProjectile = function (pos, speed, type) {
 	return new Projectile(pos, speed, type);
-}
+};
+
+ProjectileWeapon.prototype.moveOverAction = function (player) {
+	player.items.push(this);
+};

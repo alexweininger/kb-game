@@ -14,6 +14,8 @@ var itemSprite;
 var items = [];
 var walls;
 var projectileSprites = [];
+var powerups = [];
+var powerupSprites = [];
 
 function setup() {
 	// createCanvas must be the first statement
@@ -21,6 +23,7 @@ function setup() {
 	stroke(0); // Set line drawing color to white
 	frameRate(60);
 	ps = createSprite(p.pos.x, p.pos.y, 30, 30);
+	powerups.push(new HealthPack(200, 200, 20));
 }
 // The statements in draw() are executed until the
 // program is stopped. Each statement is executed in
@@ -41,7 +44,6 @@ function draw() {
 	gameLoop();
 	drawSprites();
 	item.remove();
-	updateProjectiles();
 	detectItemPickup();
 	projectileCollision();
 }
@@ -64,11 +66,13 @@ function detectItemPickup() {
 }
 
 function projectileCollision() {
-	projectileSprites.forEach(pr => {
-		if (pr.collide(ps)) {
-			p.health -= 10;
-			pr.remove();
+	var i = 0;
+	projectiles.forEach(pr => {
+		if (pr.sprite.collide(ps)) {
+			p.health -= projectiles[i].damage;
+			pr.sprite.remove();
 		}
+		i++;
 	});
 }
 
@@ -97,14 +101,9 @@ function drawGui(p) {
 	stroke(0);
 	textSize(18);
 	text(fps.toFixed(0), 10, height - 10);
-	text(p.health, 10, height - 100);
-}
-
-function updateProjectiles() {
-	projectiles = projectiles.filter(isOnScreen);
-	projectiles.forEach(proj => {
-		proj.pos.add(proj.speed);
-	});
+	text("Health: " + p.health, 10, height - 100);
+	if (p.getItemInHand() instanceof ProjectileWeapon)
+		text("Bullets: " + p.getItemInHand().getAmmo(), 120, height - 100);
 }
 
 function gameLoop() {
@@ -177,21 +176,24 @@ function gameLoop() {
 function fire(keys) {
 
 	if (p.getItemInHand() instanceof ProjectileWeapon) {
-		var d = new Date();
-		if (p.getItemInHand().lastUse - d < -p.getItemInHand().rateOfFire) {
-			var v = new Vector(0, 0);
+		if (p.getItemInHand().getAmmo() > 0) {
+			var d = new Date();
+			if (p.getItemInHand().lastUse - d < -p.getItemInHand().rateOfFire) {
+				var v = new Vector(0, 0);
 
-			keys.forEach(key => {
-				v.add(fireDirection(key));
-			});
-			if (!(v.x == 0 && v.y == 0)) {
-				p.getItemInHand().lastUse = new Date();
-
-				var projectile = createSprite(p.pos.x + 30, p.pos.y, 10, 10);
-				projectile.shapeColor = 0;
-				projectile.velocity.x = v.x;
-				projectile.velocity.y = v.y;
-				projectileSprites.push(projectile);
+				keys.forEach(key => {
+					v.add(fireDirection(key));
+				});
+				if (!(v.x == 0 && v.y == 0)) {
+					p.getItemInHand().lastUse = new Date();
+					p.getItemInHand().ammo--;
+					var projectile = createSprite(p.pos.x + 30, p.pos.y, 10, 10);
+					projectile.shapeColor = 0;
+					projectile.velocity.x = v.x;
+					projectile.velocity.y = v.y;
+					// projectileSprites.push(projectile);
+					projectiles.push(new Projectile(p.pos, v, p.getItemInHand().damage, projectile));
+				}
 			}
 		}
 	}

@@ -1,8 +1,9 @@
 class Projectile {
-	constructor(pos, speed, type) {
+	constructor(pos, speed, damage, sprite) {
 		this.pos = pos;
 		this.speed = speed;
-		this.type = type;
+		this.damage = damage;
+		this.sprite = sprite;
 	}
 }
 

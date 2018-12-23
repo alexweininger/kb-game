@@ -1,10 +1,13 @@
 class Ak47 extends ProjectileWeapon {
 	constructor() {
-		super(180, 16, "Ak-47", 30, function () {
-			ellipse(this.pos.x, this.pos.y, 5, 10);
-		});
-		this.ammoDraw = Ak47Bullets;
+		super(180, 16, "Ak-47", 30);
+		this.damage = 10;
+		this.ammo = 30;
 	}
+}
+
+Ak47.prototype.getProjectile = function (pos, speed, damage) {
+	return new Projectile(pos, speed, this.damage);
 }
 
 Ak47.prototype.getSprite = function (x, y, facing) {

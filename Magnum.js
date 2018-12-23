@@ -1,10 +1,13 @@
-
 class Magnum extends ProjectileWeapon {
 	constructor() {
-		super(800, 15, "Magnum", 7, function () {
-			ellipse(this.pos.x, this.pos.y, 5, 5);
-		});
+		super(800, 15, "Magnum", 7);
+		this.damage = 20;
+		this.ammo = 7;
 	}
+}
+
+Magnum.prototype.getProjectile = function (pos, speed, damage) {
+	return new Projectile(pos, speed, this.damage);
 }
 
 Magnum.prototype.getSprite = function(x, y, facing) {
