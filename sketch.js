@@ -12,6 +12,8 @@ var item;
 var itemsSprites = [];
 var itemSprite;
 var items = [];
+var walls;
+var projectileSprites = [];
 
 function setup() {
 	// createCanvas must be the first statement
@@ -41,6 +43,7 @@ function draw() {
 	item.remove();
 	updateProjectiles();
 	detectItemPickup();
+	projectileCollision();
 }
 
 function detectItemPickup() {
@@ -58,8 +61,14 @@ function detectItemPickup() {
 		}
 
 	}
-	itemsSprites.forEach(item => {
+}
 
+function projectileCollision() {
+	projectileSprites.forEach(pr => {
+		if (pr.collide(ps)) {
+			p.health -= 10;
+			pr.remove();
+		}
 	});
 }
 
@@ -68,9 +77,6 @@ function drawItems() {
 		if (p.getItemInHand())
 			item = p.getItemInHand().getSprite(p.pos.x, p.pos.y, p.facing);
 	}
-	itemsSprites.forEach(item => {
-
-	});
 }
 
 function drawGui(p) {
@@ -91,6 +97,7 @@ function drawGui(p) {
 	stroke(0);
 	textSize(18);
 	text(fps.toFixed(0), 10, height - 10);
+	text(p.health, 10, height - 100);
 }
 
 function updateProjectiles() {
@@ -98,8 +105,6 @@ function updateProjectiles() {
 	projectiles.forEach(proj => {
 		proj.pos.add(proj.speed);
 	});
-	if (projectiles.length)
-		console.log(projectiles);
 }
 
 function gameLoop() {
@@ -107,19 +112,23 @@ function gameLoop() {
 	ps.position.y = p.pos.y;
 
 	if (keyState[KEY_W]) {
-		p.pos.y -= p.speed;
+		if (p.pos.y > 0)
+			p.pos.y -= p.speed;
 		p.facing = 0;
 	}
 	if (keyState[KEY_A]) {
-		p.pos.x -= p.speed;
+		if (p.pos.x > 0)
+			p.pos.x -= p.speed;
 		p.facing = 3;
 	}
 	if (keyState[KEY_S]) {
-		p.pos.y += p.speed;
+		if (p.pos.y < CANVAS_HEIGHT)
+			p.pos.y += p.speed;
 		p.facing = 2;
 	}
 	if (keyState[KEY_D]) {
-		p.pos.x += p.speed;
+		if (p.pos.x < CANVAS_WIDTH)
+			p.pos.x += p.speed;
 		p.facing = 1;
 	}
 	if (keyState[KEY_W] || keyState[KEY_A] || keyState[KEY_S] || keyState[KEY_D]) {
@@ -182,6 +191,7 @@ function fire(keys) {
 				projectile.shapeColor = 0;
 				projectile.velocity.x = v.x;
 				projectile.velocity.y = v.y;
+				projectileSprites.push(projectile);
 			}
 		}
 	}

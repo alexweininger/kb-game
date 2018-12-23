@@ -7,6 +7,7 @@ class Player {
 		this.items.push(new Magnum());
 		this.items.push(new Ak47());
 		this.facing = 0;
+		this.health = 100;
 	}
 
 	static create(pos) {

@@ -3,7 +3,6 @@ class Item {
 		this.name = name;
 		this.owned = true;
 	}
-
 }
 
 Object.defineProperty(Item.prototype, 'constructor', {
