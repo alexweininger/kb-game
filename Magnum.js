@@ -10,7 +10,7 @@ Magnum.prototype.getProjectile = function (pos, speed, damage) {
 	return new Projectile(pos, speed, this.damage);
 }
 
-Magnum.prototype.getSprite = function(x, y, facing) {
+Magnum.prototype.makeSprite = function(x, y, facing) {
 	var s;
 	if (facing == 0) {
 		s = createSprite(x, y - 30, 10, 10);

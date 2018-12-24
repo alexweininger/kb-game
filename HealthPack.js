@@ -7,6 +7,12 @@ class HealthPack extends Item {
 	}
 }
 
-HealthPack.prototype.moveOverAction = function (player) {
+HealthPack.prototype.collisionAction = function (player) {
+	console.log("health pack");
 	player.health += this.health;
+	this.sprite.remove();
 };
+
+HealthPack.prototype.pickup = function () {
+	return false;
+}

@@ -16,6 +16,8 @@ ProjectileWeapon.prototype.getProjectile = function (pos, speed, type) {
 	return new Projectile(pos, speed, type);
 };
 
-ProjectileWeapon.prototype.moveOverAction = function (player) {
-	player.items.push(this);
+ProjectileWeapon.prototype.collisionAction = function (player) {
+	if (this.pickup(player)) {
+		this.sprite.remove();
+	}
 };

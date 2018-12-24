@@ -1,37 +1,37 @@
 p5.disableFriendlyErrors = true;
+var CANVAS_HEIGHT = 800;
+var CANVAS_WIDTH = 1440;
 var keyState = {};
-var p = new Player(new Vector(100, 100), 5);
+var p;
 var shootKeys = [];
 var walking = false;
 var projectiles = [];
 var walkToggle = false;
-var CANVAS_HEIGHT = 800;
-var CANVAS_WIDTH = 1440;
-var ps;
 var item;
 var itemsSprites = [];
 var itemSprite;
 var items = [];
 var walls;
 var projectileSprites = [];
-var powerups = [];
-var powerupSprites = [];
+var itemsOnGround = [];
 
 function setup() {
 	// createCanvas must be the first statement
 	createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 	stroke(0); // Set line drawing color to white
 	frameRate(60);
-	ps = createSprite(p.pos.x, p.pos.y, 30, 30);
-	powerups.push(new HealthPack(200, 200, 20));
+	p = new Player(new Vector(100, 100), 5); // creating the player object
+	// ps = createSprite(p.pos.x, p.pos.y, 30, 30); // creating the player sprite
+	p.makeSprite();
+	items.push(new HealthPack(200, 200, 20));
 }
 // The statements in draw() are executed until the
 // program is stopped. Each statement is executed in
 // sequence and after the last line is read, the first
 // line is executed again.
 function draw() {
-	background(255); // Set the background to white
 
+	// keyboard event listeners
 	window.addEventListener('keydown', function (e) {
 		keyState[e.keyCode || e.which] = true;
 	}, true);
@@ -39,27 +39,23 @@ function draw() {
 		keyState[e.keyCode || e.which] = false;
 	}, true);
 
-	drawItems();
+	background(255); // Set the background to white
 	drawGui(p);
-	gameLoop();
-	drawSprites();
-	item.remove();
+	inputLoop();
 	detectItemPickup();
+	drawSprites();
 	projectileCollision();
 }
 
 function detectItemPickup() {
 	for (let i = 0; i < items.length; i++) {
 		const it = items[i];
-		const sp = itemsSprites[i];
-		if (sp.overlap(ps)) {
+		if (it.sprite.overlap(p.sprite)) {
 			if (p.items.length == 0) {
 				p.currentItemIndex = 0;
 			}
 			console.log("collide");
-			it.pickup();
-			p.items.push(it);
-			sp.remove();
+			it.collisionAction(p);
 		}
 
 	}
@@ -68,19 +64,12 @@ function detectItemPickup() {
 function projectileCollision() {
 	var i = 0;
 	projectiles.forEach(pr => {
-		if (pr.sprite.collide(ps)) {
+		if (pr.sprite.collide(p.sprite)) {
 			p.health -= projectiles[i].damage;
 			pr.sprite.remove();
 		}
 		i++;
 	});
-}
-
-function drawItems() {
-	if (p.items.length > 0) {
-		if (p.getItemInHand())
-			item = p.getItemInHand().getSprite(p.pos.x, p.pos.y, p.facing);
-	}
 }
 
 function drawGui(p) {
@@ -106,9 +95,10 @@ function drawGui(p) {
 		text("Bullets: " + p.getItemInHand().getAmmo(), 120, height - 100);
 }
 
-function gameLoop() {
-	ps.position.x = p.pos.x;
-	ps.position.y = p.pos.y;
+function inputLoop() {
+	p.sprite.position.x = p.pos.x;
+	p.sprite.position.y = p.pos.y;
+	p.updateItemSprite();
 
 	if (keyState[KEY_W]) {
 		if (p.pos.y > 0)
@@ -166,7 +156,6 @@ function gameLoop() {
 				}
 				p.dropItem(p.pos);
 				items.push(h);
-				itemsSprites.push(h.getSprite(h.pos.x, h.pos.y, h.direction));
 			}
 		}
 		keyState[KEY_C] = false;
@@ -174,7 +163,6 @@ function gameLoop() {
 }
 
 function fire(keys) {
-
 	if (p.getItemInHand() instanceof ProjectileWeapon) {
 		if (p.getItemInHand().getAmmo() > 0) {
 			var d = new Date();
@@ -187,7 +175,7 @@ function fire(keys) {
 				if (!(v.x == 0 && v.y == 0)) {
 					p.getItemInHand().lastUse = new Date();
 					p.getItemInHand().ammo--;
-					var projectile = createSprite(p.pos.x + 30, p.pos.y, 10, 10);
+					var projectile = createSprite(p.pos.x + 30, p.pos.y, 5, 5);
 					projectile.shapeColor = 0;
 					projectile.velocity.x = v.x;
 					projectile.velocity.y = v.y;
@@ -199,6 +187,23 @@ function fire(keys) {
 	}
 	shootKeys = [];
 }
+
+var KEY_W = 87;
+var KEY_A = 65;
+var KEY_S = 83;
+var KEY_D = 68;
+
+var KEY_I = 73;
+var KEY_J = 74;
+var KEY_K = 75;
+var KEY_L = 76;
+
+var KEY_Q = 81;
+var KEY_E = 69;
+
+var KEY_C = 67;
+
+var KEY_SPACE = 32;
 
 function fireDirection(key) {
 	if (key === KEY_I) {
@@ -224,30 +229,6 @@ function keyPress(key) {
 	}
 }
 
-function isOnScreen(object) {
-	if (object.pos.x < -100 || object.pos.y < -100 || object.pos.x > CANVAS_WIDTH + 100 || object.pos.y > CANVAS_HEIGHT + 100) {
-		return false;
-	}
-	return true;
-}
-
 function isKeyDown(key) {
 	return keyState[key];
 }
-
-var KEY_W = 87;
-var KEY_A = 65;
-var KEY_S = 83;
-var KEY_D = 68;
-
-var KEY_I = 73;
-var KEY_J = 74;
-var KEY_K = 75;
-var KEY_L = 76;
-
-var KEY_Q = 81;
-var KEY_E = 69;
-
-var KEY_C = 67;
-
-var KEY_SPACE = 32;

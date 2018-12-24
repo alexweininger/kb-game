@@ -6,7 +6,3 @@ class Projectile {
 		this.sprite = sprite;
 	}
 }
-
-Projectile.prototype.draw = function () {
-	ellipse(this.pos.x, this.pos.y, 10, 10);
-}
